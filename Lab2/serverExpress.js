@@ -1,0 +1,54 @@
+
+	
+//
+var list = [];
+// подключение express
+const express = require("express");
+const bodyParser = require("body-parser");
+// создаем объект приложения
+const app = express();	
+// парсер для данных
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+//Логирование
+var expressLogging = require('express-logging'),
+	logger = require('logops');
+app.use(expressLogging(logger));
+
+//Раздача
+var publicDir = require('path').join(__dirname,'/static');
+app.use(express.static(publicDir));
+// определяем обработчик для маршрута "/"
+app.get("/", function(request, response){
+    response.sendFile(__dirname + '/static/html/index.html');
+	logger.info('GET request');
+});
+//получить список
+app.get("/getlist", function(req, res){
+	res.send(list);
+	logger.info('GET request LIST');
+});
+
+app.post("/", function(req, res) {
+	list.push(req.body);
+	res.send(req.body);
+	logger.info('POST request');
+});
+app.delete("/", function(req, res) {
+	list.pop();
+	res.json("<h2>Удалил</h2>");
+	logger.info('DELETE request');
+});
+app.put("/", function(req, res) {
+	list.splice(req.body.index,1);
+	res.json("<h2>PUT запрос</h2>");
+	logger.info('PUT request');
+});
+app.options("/", function(req, res) {
+	res.setHeader('Allow', 'GET, POST, DELETE, PUT, OPTIONS')
+	res.json({ response: "This is OPTIONS"});
+	logger.info('OPTIONS request');
+});
+// начинаем прослушивать подключения на 3000 порту
+app.listen(3000);

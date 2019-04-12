@@ -1,0 +1,47 @@
+
+user  nginx;
+worker_processes  1;
+
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+   server {
+	listen 3000;
+	location /service1 {
+		proxy_pass http://localhost:3001/;
+	}
+	location /service2 {
+		proxy_pass http://localhost:3002/;
+	}
+   }
+   server {
+	listen 3001;
+	server_name static.first.ru;
+	location / {
+		root /temp;
+		index index1.html;
+	}
+	location /temp {
+		root /;
+	}
+   }    
+   server {
+	listen 3002;
+	server_name static.second.ru;
+	location / {
+		root /temp;
+		index index2.html;
+	}
+	location /temp {
+		root /;
+	
+	}
+   }
+}
